@@ -10,9 +10,8 @@ public class SelectOperator extends Operator {
     private RelationalAtom atom;
 
 
-    public SelectOperator(RelationalAtom rAtom, List<ComparisonAtom> compAtoms){
-
-
+    public SelectOperator(Operator child, RelationalAtom rAtom, List<ComparisonAtom> compAtoms){
+        this.child = child;
         List<Term> terms= rAtom.getTerms();                     //implicit equivalence predicate
         for (Term x:terms){
             boolean isVar = Variable.class.isInstance(x);
@@ -26,12 +25,7 @@ public class SelectOperator extends Operator {
                 ComparisonAtom comp = new ComparisonAtom(var, term2, op);
                 compAtoms.add(comp);
             }
-
-
         }
-
-
-
         this.comp =compAtoms;
         this.atom = rAtom;
 
@@ -45,30 +39,16 @@ public class SelectOperator extends Operator {
     public Tuple getNextTuple() {
         System.out.println(child);
         Tuple tuple = child.getNextTuple();
+        SelectCheck check = new SelectCheck();
         while (tuple!=null){
-            SelectCheck check = new SelectCheck();
-            boolean res = true;
-            for (ComparisonAtom comp: this.comp){
-                res = check.Check(comp, this.atom, tuple);
-                System.out.println(res);
-                if (res==false) {
-                    break;
-                }
-            }
-
-
-            if (res!=false){
+            if (check.check(this.comp, this.atom, tuple)){
                 return tuple;
             }
             else{
                 tuple = child.getNextTuple();
-
             }
-
         }
-
         return null;
-
     }
 
     @Override

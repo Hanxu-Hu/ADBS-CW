@@ -37,9 +37,12 @@ public class Minibase {
         try {
             Interpreter interpreter = new Interpreter(databaseDir, inputFile, outputFile);
             interpreter.evaluateQuery();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
 
 
 //        ArrayList<String> SchemaNameList =  new ArrayList<String>();

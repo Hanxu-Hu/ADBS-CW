@@ -2,6 +2,7 @@ package ed.inf.adbs.minibase.operator;
 
 import ed.inf.adbs.minibase.base.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -16,12 +17,64 @@ public class SelectCheck {
 
 
     }
-    public boolean Check(ComparisonAtom condition, RelationalAtom atom,Tuple tuple ){
+
+
+    private boolean isComp(ComparisonAtom comp, RelationalAtom atom){
+        Term compTerm1 = comp.getTerm1();
+        Term  compTerm2 = comp.getTerm2();
+        List<Term> compTerms = new ArrayList<>();
+        if (Variable.class.isInstance(compTerm1)){
+            compTerms.add(compTerm1);
+        }
+
+        if (Variable.class.isInstance(compTerm2)){
+            compTerms.add(compTerm2);
+        }
+        //System.out.println(compTerms);
+        List<Term> reTerms = atom.getTerms();
+        for (Term compTerm: compTerms){
+            boolean flag = false;
+            for (Term term: reTerms){
+                String sTerm = term.toString();
+                String sCompTerm = compTerm.toString();
+                if (sTerm.equals(sCompTerm)) {
+                    flag = true;
+                    break;
+                }
+
+            }
+            if (!flag){
+                return false;
+            }
+
+        }
+        return true;
+    }
+
+    public boolean check(List<ComparisonAtom> condition, RelationalAtom atom, Tuple tuple){
+        boolean res = true;
+        //for (ComparisonAtom comp: this.comp){
+        List<ComparisonAtom> processedCon = new ArrayList<>();
+        for (ComparisonAtom x : condition){
+            if(isComp(x, atom)){
+                processedCon.add(x);
+            }
+        }
+        for (ComparisonAtom comp: processedCon) {
+            res = singleCheck(comp, atom, tuple);
+            //System.out.println(res);
+            if (!res) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public boolean singleCheck(ComparisonAtom condition, RelationalAtom atom,Tuple tuple ){
         String rename = tuple.getRename();
-        System.out.println(rename);
+        //System.out.println(rename);
 
         String schema =Catalog.INSTANCE.getSchema(rename);
-        System.out.println(schema);
+        //System.out.println(schema);
         HashMap<String,String>  map= new HashMap<String,String> ();   // map from terms to tuple
 
         String sTuple = tuple.toString();

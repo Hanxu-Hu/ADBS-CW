@@ -3,6 +3,7 @@ package ed.inf.adbs.minibase;
 import ed.inf.adbs.minibase.base.*;
 import ed.inf.adbs.minibase.operator.*;
 import ed.inf.adbs.minibase.parser.QueryParser;
+import jdk.jfr.Relational;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,14 +23,32 @@ public class Interpreter {
         // read database
         Catalog.INSTANCE.initialize(databaseDir);
         // plan query
+
+
         planQuery(query);
         // prepare PrintStream
+        List<Atom> body = query.getBody();
+        System.out.println(body.get(0).toString());
+        RelationalAtom atom = changeTermName((RelationalAtom) body.get(0));
+        System.out.println(atom.toString());
         printStream = new PrintStream(new FileOutputStream(outputFile, true));
     }
 
     public void evaluateQuery() {
         root.dump(printStream);
     }
+
+
+    public RelationalAtom changeTermName(RelationalAtom atom){
+        List<Term> terms = atom.getTerms();
+        String rName = atom.getName();
+        for (Term x: terms){
+            String s = rName+"_"+x.toString();
+            x = new Variable(s);
+        }
+        return atom;
+    }
+
 
     private void planQuery(Query query) {
         RelationalAtom head = query.getHead();
@@ -45,15 +64,46 @@ public class Interpreter {
                 relationalAtom = (RelationalAtom) x;
             };
         }
+
         planSingleRelationQuery(head, relationalAtom, comp);
     }
+
+
+    private void planMultipleRelationQuery(RelationalAtom head, List<RelationalAtom> rAtoms, List<ComparisonAtom> bodyComparisonAtoms) throws IOException {
+        RelationalAtom leftAtom = rAtoms.get(0);
+        RelationalAtom rightAtom = rAtoms.get(1);
+        Operator leftScanOp = new ScanOperator(leftAtom);
+        Operator rightScanOp = null;
+
+        for (int i = 0; i <rAtoms.size()-1 ; i++) {
+
+            //ScanOperator leftScanOp = null;
+            rightAtom = rAtoms.get(i+1);
+            try {
+                rightScanOp = new ScanOperator(rightAtom);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //SelectOperator leftSelectOperator = new SelectOperator(leftScanOp,leftAtom, bodyComparisonAtoms);
+            SelectOperator rightSelectOperator = new SelectOperator(rightScanOp,rightAtom, bodyComparisonAtoms);
+
+            assert leftScanOp != null;
+
+            JoinOperator joinOp = new JoinOperator(leftScanOp, rightSelectOperator, leftAtom, rightAtom, bodyComparisonAtoms);
+            //RelationalAtom joinRe = joinOp.joinRelation();
+            leftScanOp = joinOp;
+
+        }
+
+    }
+
 
     private void planSingleRelationQuery(RelationalAtom head, RelationalAtom rAtom,
                                           List<ComparisonAtom> bodyComparisonAtoms) {
 
         Operator scanOp = null;
         try {
-            scanOp = new ScanOperator(rAtom.getName());
+            scanOp = new ScanOperator(rAtom);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,16 +128,16 @@ public class Interpreter {
             root = scanOp;
 
          } else if (requireProjection && !requireSelection) {
-            root = new ProjectionOperator( rAtom, head);
-            ((ProjectionOperator) root).SetChild(scanOp);
+            root = new ProjectionOperator(scanOp, rAtom, head);
+            //((ProjectionOperator) root).SetChild(scanOp);
          } else if (!requireProjection && requireSelection) {
-            root = new SelectOperator(rAtom, bodyComparisonAtoms);
-            ((SelectOperator) root).SetChild(scanOp);
+            root = new SelectOperator(scanOp, rAtom, bodyComparisonAtoms);
+            //((SelectOperator) root).SetChild(scanOp);
          } else if (requireProjection && requireSelection) {
-            Operator selectOp = new SelectOperator(rAtom, bodyComparisonAtoms);
-            root = new ProjectionOperator(rAtom, head);
-            ((ProjectionOperator) root).SetChild(selectOp);
-             ((SelectOperator) selectOp).SetChild(scanOp);
+            Operator selectOp = new SelectOperator(scanOp,rAtom, bodyComparisonAtoms);
+            root = new ProjectionOperator(selectOp,rAtom, head);
+            //((ProjectionOperator) root).SetChild(selectOp);
+             // ((SelectOperator) selectOp).SetChild(scanOp);
          }
      }
 

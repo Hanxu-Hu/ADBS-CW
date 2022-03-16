@@ -1,5 +1,7 @@
 package ed.inf.adbs.minibase.operator;
 
+import ed.inf.adbs.minibase.base.RelationalAtom;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +12,9 @@ public class ScanOperator extends Operator {
     //private int step=0;
     private BufferedReader br;
 
-    public ScanOperator(String reName) throws IOException {
-        this.reName = reName;
+    public ScanOperator(RelationalAtom atom) throws IOException {
+
+        this.reName = atom.getName();
         System.out.println(reName);
         // Open the file
 

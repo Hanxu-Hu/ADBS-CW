@@ -1,5 +1,7 @@
 package ed.inf.adbs.minibase.operator;
 
+import java.util.List;
+
 public class Tuple {
     private String content;
     private String rename;
@@ -8,23 +10,20 @@ public class Tuple {
 
     }
     public void setTuple(String input, String rename){
-        String content = new String();
-        content =input;
-        this.content = content;
+        this.content = input;
         this.rename = rename;
     }
     public String toString(){
-        String content = new String();
-        content =this.content;
+        String content = this.content;
         System.out.println(content);
         return content;
-
-
     }
+    public String[] getArray(){
+        return this.content.split(", ");
+    }
+
     public String getRename(){
-        String rename = new String();
-        rename =this.rename;
-        return rename;
+        return this.rename;
     }
 
 

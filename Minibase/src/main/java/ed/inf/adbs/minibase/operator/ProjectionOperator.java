@@ -11,18 +11,18 @@ public class ProjectionOperator extends Operator{
     private List<String> buffer;
     private RelationalAtom body;
     private RelationalAtom head;
-    public ProjectionOperator(RelationalAtom body, RelationalAtom head){
-        this.head =head;
+    public ProjectionOperator(Operator child,RelationalAtom body, RelationalAtom head){
+        this.head = head;
         this.body = body;
+        this.child = child;
         this.buffer = new ArrayList<>();
-
     }
 
     public void SetChild(Operator child){
         this.child = child;
 
     }
-    public List<String> Process(Tuple tuple){
+    public String Process(Tuple tuple){
         List<Term> bodyTerms = this.body.getTerms();
         String sTuple = tuple.toString();
         String[] arrayTuple = sTuple.split(", ");
@@ -34,7 +34,6 @@ public class ProjectionOperator extends Operator{
             String s =x.toString();
             posMap.put(s, i);
             i+=1;
-
         }
         List<Integer> posList = new ArrayList<>();
         for (Term x :headTerms){
@@ -46,11 +45,18 @@ public class ProjectionOperator extends Operator{
         List<String> res = new ArrayList<>();
         for (int p: posList){
             res.add(arrayTuple[p]);
-
         }
-        return res;
 
-
+        String result = "";
+        int j = 0;
+        for (String x:res){
+            String temp;
+            if (j<(res.size()-1)){temp= x+", ";}
+            else{temp = x;}
+            result+=temp;
+            j+=1;
+        }
+        return result;
     }
 
 
@@ -58,25 +64,26 @@ public class ProjectionOperator extends Operator{
     public Tuple getNextTuple() {
         Tuple tuple = this.child.getNextTuple();
         if (tuple!=null){
+            String sTuple = Process(tuple);
 
-            boolean flag =this.buffer.contains(tuple.toString());
-            while(flag== true){
+
+            boolean flag =this.buffer.contains(sTuple);
+            //System.out.println(this.buffer);
+            while(flag){
                 tuple = this.child.getNextTuple();
                 if (tuple==null){
                     return null;
                 }
-                flag =this.buffer.contains(tuple.toString());
+                sTuple = Process(tuple);
+                flag =this.buffer.contains(sTuple);
             }
+            //System.out.println(string);
 
-            this.buffer.add(tuple.toString());
-            List<String> out = Process(tuple);
-            String res = "";
-            for (String x:out){
-                String temp= x+", ";
-                res+=temp;
-            }
+            this.buffer.add(sTuple);
+
+
             Tuple result = new Tuple();
-            result.setTuple(res, "Q");
+            result.setTuple(sTuple, "Q");
             return result;
             }
 
