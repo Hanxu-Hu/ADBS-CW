@@ -42,7 +42,7 @@ public class QueryParser {
                     .stream()
                     .map(v -> v.accept(variableVisitor))
                     .collect(toList());
-            RelationalAtom head = new RelationalAtom(headName, headVariables);
+            //RelationalAtom head = new RelationalAtom(headName, headVariables);
 
             AtomVisitor atomVisitor = new AtomVisitor();
             List<Atom> body = ctx.body().atom()
@@ -57,6 +57,11 @@ public class QueryParser {
 
             // Check if SUM exists
             if (ctx.head().sumagg() != null) {
+
+                String sumVarName= ctx.head().sumagg().variable().getText();
+                Aggregator sumAgg = new Aggregator(sumVarName,"SUM");
+                headVariables.add(sumAgg);
+
                 // Do something with this aggregate
 
                 //System.err.println("SUM variable name: " + ctx.head().sumagg().variable().getText());
@@ -64,10 +69,15 @@ public class QueryParser {
 
             // Check if AVG exists
             if (ctx.head().avgagg() != null) {
+                String avgVarName= ctx.head().avgagg().variable().getText();
+                Aggregator avgAgg = new Aggregator(avgVarName,"AVG");
+                headVariables.add(avgAgg);
                 // Do something with this aggregate
 
                 //System.err.println("AVG variable name: " + ctx.head().avgagg().variable().getText());
             }
+            RelationalAtom head = new RelationalAtom(headName, headVariables);
+
 
             return new Query(head, body);
         }

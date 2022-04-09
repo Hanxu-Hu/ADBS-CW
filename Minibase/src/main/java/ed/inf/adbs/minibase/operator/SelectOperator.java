@@ -10,6 +10,16 @@ public class SelectOperator extends Operator {
     private RelationalAtom atom;
 
 
+    /**
+     * this method is constructing an instance of select operator
+     * for every terms in the relational atom, determine whether the term is variable or not,
+     * if it is not a variable, it indicate that this term is an implicit equivalence,
+     * so a comparison atom should be created.
+     * then, the comparison atoms and relational atom will be saved as private variable for further use.
+     * @param child the child operator of the select operator
+     * @param rAtom the relational atom
+     * @param compAtoms a list of comparison atoms
+     */
     public SelectOperator(Operator child, RelationalAtom rAtom, List<ComparisonAtom> compAtoms){
         this.child = child;
         List<Term> terms= rAtom.getTerms();                     //implicit equivalence predicate
@@ -30,14 +40,14 @@ public class SelectOperator extends Operator {
         this.atom = rAtom;
 
     }
-    public void SetChild(Operator child){
-        this.child = child;
 
-    }
     @Override
-
+    /**
+     * this getNextTuple() method first call the getNextTuple() of child operator,
+     * then if the return of the child getNextTuple() method is not null; it will use "check" method to know whether this
+     * tuple satisfied the condition of the comparison atoms.
+     */
     public Tuple getNextTuple() {
-        System.out.println(child);
         Tuple tuple = child.getNextTuple();
         SelectCheck check = new SelectCheck();
         while (tuple!=null){
@@ -52,8 +62,10 @@ public class SelectOperator extends Operator {
     }
 
     @Override
+    /**
+     * the reset() method call the reset() method of the child operator.
+     */
     public void reset() {
         this.child.reset();
-
     }
 }

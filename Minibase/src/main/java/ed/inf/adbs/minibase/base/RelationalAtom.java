@@ -2,6 +2,7 @@ package ed.inf.adbs.minibase.base;
 
 import ed.inf.adbs.minibase.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RelationalAtom extends Atom {
@@ -20,6 +21,11 @@ public class RelationalAtom extends Atom {
 
     public List<Term> getTerms() {
         return terms;
+    }
+    public RelationalAtom clone(){
+        List<Term> clonedList = new ArrayList<>(terms);
+        String newName= name;
+        return new RelationalAtom(newName, clonedList);
     }
 
     @Override
