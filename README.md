@@ -1,6 +1,6 @@
 # ADBS-CW
 
-## This is a toy in-memory database system I implement in the course ADBS
+## This is a toy in-memory database system I implement in the course ADBS, which includes query minimization and query evaluation
 
 
 
