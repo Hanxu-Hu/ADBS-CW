@@ -1,5 +1,10 @@
 # ADBS-CW
 
+## This is a toy in-memory database system I implement in the course ADBS
+
+
+
+
 The logic of capturing join condition is that, firstly join the 
 left relation and right relation to get the joined relation by using the joinRelation() method 
  in the JoinOperator class during query planning, then let the joined relation and the list of all comparison atoms
